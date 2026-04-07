@@ -19,7 +19,6 @@ input, textarea, select, button { font-family: var(--font); }
 ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-/* Login */
 #login-screen {
   min-height:100vh; display:flex; align-items:center; justify-content:center;
   background: radial-gradient(ellipse at 30% 20%, rgba(232,111,60,0.08) 0%, transparent 50%),
@@ -27,8 +26,7 @@ input, textarea, select, button { font-family: var(--font); }
 }
 .login-box {
   width:380px; padding:40px; background:var(--surface); border-radius:16px;
-  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4);
-  animation: fadeIn 0.6s ease;
+  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4); animation: fadeIn 0.6s ease;
 }
 .login-box h1 { color:var(--text); font-size:22px; font-weight:700; }
 .login-box p { color:var(--text-muted); font-size:13px; margin-top:6px; }
@@ -37,7 +35,6 @@ input, textarea, select, button { font-family: var(--font); }
 .login-error { color:var(--danger); font-size:13px; text-align:center; min-height:20px; }
 .login-hint { color:var(--text-muted); font-size:11px; text-align:center; margin-top:20px; opacity:0.6; }
 
-/* Setup */
 #setup-screen {
   min-height:100vh; display:none; align-items:center; justify-content:center;
   background: radial-gradient(ellipse at 30% 20%, rgba(232,111,60,0.08) 0%, transparent 50%),
@@ -45,8 +42,7 @@ input, textarea, select, button { font-family: var(--font); }
 }
 .setup-box {
   width:520px; padding:40px; background:var(--surface); border-radius:16px;
-  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4);
-  animation: fadeIn 0.6s ease;
+  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4); animation: fadeIn 0.6s ease;
 }
 .setup-box h1 { color:var(--text); font-size:20px; font-weight:700; margin-bottom:6px; }
 .setup-box .sub { color:var(--text-muted); font-size:13px; margin-bottom:24px; line-height:1.6; }
@@ -56,7 +52,6 @@ input, textarea, select, button { font-family: var(--font); }
 .setup-status.ok { color:var(--success); }
 .setup-status.err { color:var(--danger); }
 
-/* Inputs */
 .input {
   width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
   background:var(--bg); color:var(--text); font-size:14px; outline:none; transition:border 0.2s;
@@ -72,7 +67,6 @@ textarea.input { resize:vertical; line-height:1.6; }
 .btn-sm { width:auto; padding:8px 18px; border-radius:8px; font-size:13px; }
 .form-group { display:flex; flex-direction:column; gap:14px; }
 
-/* Layout */
 #app { display:none; min-height:100vh; }
 .layout { display:flex; min-height:100vh; }
 .sidebar {
@@ -132,13 +126,54 @@ textarea.input { resize:vertical; line-height:1.6; }
 
 .header {
   padding:18px 28px; border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:16px;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
 }
-.header h2 { flex:1; font-size:20px; font-weight:700; margin:0; }
+.header h2 { flex:1; font-size:20px; font-weight:700; margin:0; min-width:200px; }
+
+/* Breadcrumb */
+.breadcrumb {
+  display:flex; align-items:center; gap:4px; padding:12px 28px 0;
+  font-size:13px; flex-wrap:wrap;
+}
+.breadcrumb-item {
+  background:none; border:none; color:var(--text-muted); cursor:pointer;
+  font-family:var(--font); font-size:13px; padding:4px 8px; border-radius:6px;
+  transition:all 0.15s;
+}
+.breadcrumb-item:hover { background:var(--surface-hover); color:var(--text); }
+.breadcrumb-item.current { color:var(--text); font-weight:600; cursor:default; }
+.breadcrumb-item.current:hover { background:transparent; }
+.breadcrumb-sep { color:var(--border); font-size:12px; }
 
 .content { flex:1; overflow-y:auto; padding:28px; }
 .empty-state { text-align:center; padding:80px 0; color:var(--text-muted); }
 .empty-state .big-icon { font-size:48px; margin-bottom:12px; opacity:0.3; }
+
+/* Folders */
+.folders-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+.folder-card {
+  display:flex; align-items:center; gap:10px; padding:14px 18px;
+  background:var(--surface); border-radius:12px; border:1px solid var(--border);
+  cursor:pointer; transition:all 0.15s; min-width:180px; position:relative;
+}
+.folder-card:hover { border-color:var(--text-muted); background:var(--surface-hover); }
+.folder-card .folder-icon { font-size:24px; }
+.folder-card .folder-name { font-size:13px; font-weight:600; }
+.folder-card .folder-count { font-size:11px; color:var(--text-muted); }
+.folder-card .folder-delete {
+  position:absolute; top:6px; right:8px; background:none; border:none;
+  color:var(--text-muted); cursor:pointer; font-size:11px; opacity:0; transition:opacity 0.15s;
+}
+.folder-card:hover .folder-delete { opacity:0.5; }
+.folder-card .folder-delete:hover { opacity:1; color:var(--danger); }
+
+.btn-add-folder {
+  display:flex; align-items:center; gap:8px; padding:14px 18px;
+  background:transparent; border-radius:12px; border:1px dashed var(--border);
+  cursor:pointer; transition:all 0.15s; color:var(--text-muted); font-size:13px;
+  font-family:var(--font);
+}
+.btn-add-folder:hover { border-color:var(--text-muted); }
 
 .cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
 .card {
@@ -238,8 +273,9 @@ textarea.input { resize:vertical; line-height:1.6; }
   .mobile-menu-btn { display:block; }
   .cards-grid { grid-template-columns:1fr; }
   .login-box, .setup-box { width:90vw; padding:28px; }
+  .folders-row { flex-direction:column; }
+  .folder-card, .btn-add-folder { min-width:auto; }
 }
-
 @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 .shake { animation: shake 0.4s ease; }
@@ -247,7 +283,6 @@ textarea.input { resize:vertical; line-height:1.6; }
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading" style="display:none">
   <div class="spinner"></div>
   <div style="color:var(--text-muted);font-size:14px">Chargement...</div>
@@ -262,30 +297,12 @@ textarea.input { resize:vertical; line-height:1.6; }
       <p class="sub">Colle ici ta configuration Firebase pour synchroniser tes données partout.<br>
       Console Firebase → Paramètres du projet → Config.</p>
     </div>
-    <div class="field">
-      <label>apiKey</label>
-      <input class="input input-sm" id="cfg-apiKey" placeholder="AIzaSy...">
-    </div>
-    <div class="field">
-      <label>authDomain</label>
-      <input class="input input-sm" id="cfg-authDomain" placeholder="mon-projet.firebaseapp.com">
-    </div>
-    <div class="field">
-      <label>projectId</label>
-      <input class="input input-sm" id="cfg-projectId" placeholder="mon-projet">
-    </div>
-    <div class="field">
-      <label>storageBucket</label>
-      <input class="input input-sm" id="cfg-storageBucket" placeholder="mon-projet.firebasestorage.app">
-    </div>
-    <div class="field">
-      <label>messagingSenderId</label>
-      <input class="input input-sm" id="cfg-messagingSenderId" placeholder="123456789">
-    </div>
-    <div class="field">
-      <label>appId</label>
-      <input class="input input-sm" id="cfg-appId" placeholder="1:123456789:web:abc123">
-    </div>
+    <div class="field"><label>apiKey</label><input class="input input-sm" id="cfg-apiKey" placeholder="AIzaSy..."></div>
+    <div class="field"><label>authDomain</label><input class="input input-sm" id="cfg-authDomain" placeholder="mon-projet.firebaseapp.com"></div>
+    <div class="field"><label>projectId</label><input class="input input-sm" id="cfg-projectId" placeholder="mon-projet"></div>
+    <div class="field"><label>storageBucket</label><input class="input input-sm" id="cfg-storageBucket" placeholder="mon-projet.firebasestorage.app"></div>
+    <div class="field"><label>messagingSenderId</label><input class="input input-sm" id="cfg-messagingSenderId" placeholder="123456789"></div>
+    <div class="field"><label>appId</label><input class="input input-sm" id="cfg-appId" placeholder="1:123456789:web:abc123"></div>
     <div class="setup-status" id="setup-status"></div>
     <button class="btn-primary" onclick="saveFirebaseConfig()" style="margin-top:8px">Connecter à Firebase</button>
     <p style="color:var(--text-muted);font-size:11px;text-align:center;margin-top:16px;opacity:0.6">
@@ -345,8 +362,12 @@ textarea.input { resize:vertical; line-height:1.6; }
       <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
       <h2 id="section-title">—</h2>
       <input class="input input-sm" id="search-input" placeholder="Rechercher..." style="width:220px" oninput="renderContent()">
-      <button class="btn-primary btn-sm" onclick="openAddItem()">+ Ajouter</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary btn-sm" onclick="openAddFolder()" style="background:var(--surface-hover);color:var(--text);border:1px solid var(--border)">📁 Dossier</button>
+        <button class="btn-primary btn-sm" onclick="openAddItem()">+ Ajouter</button>
+      </div>
     </header>
+    <div id="breadcrumb-bar" class="breadcrumb" style="display:none"></div>
     <div class="content" id="content"></div>
   </main>
 </div>
@@ -402,6 +423,19 @@ textarea.input { resize:vertical; line-height:1.6; }
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-add-folder" style="display:none" onclick="closeModal('modal-add-folder')">
+  <div class="modal" style="width:400px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nouveau dossier</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-folder')">✕</button>
+    </div>
+    <div class="form-group">
+      <input class="input" id="folder-name" placeholder="Nom du dossier *">
+      <button class="btn-primary" onclick="addFolder()">Créer le dossier</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -419,15 +453,15 @@ const DEFAULT_IDS = DEFAULT_SECTIONS.map(s => s.id);
 const DOC_ID = 'main';
 
 let db = null;
-let data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {} };
+let data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {}, folders: {} };
 let activeSection = null;
+let currentFolder = null; // null = root of section
 let unsubscribe = null;
 
 // ── Config ──
 function getStoredConfig() {
   try { return JSON.parse(localStorage.getItem(CONFIG_KEY)); } catch { return null; }
 }
-
 function saveFirebaseConfig() {
   const fields = ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
   const config = {};
@@ -442,19 +476,16 @@ function saveFirebaseConfig() {
     initFirebase(config);
   } catch(e) { setSetupStatus('Erreur : ' + e.message, 'err'); }
 }
-
 function setSetupStatus(msg, cls) {
   const el = document.getElementById('setup-status');
   el.textContent = msg; el.className = 'setup-status ' + (cls || '');
 }
-
 function resetConfig() {
   if (!confirm('Reconfigurer Firebase ?')) return;
   if (unsubscribe) unsubscribe();
   localStorage.removeItem(CONFIG_KEY);
   showScreen('setup');
 }
-
 function initFirebase(config) {
   try {
     if (!firebase.apps.length) firebase.initializeApp(config);
@@ -462,7 +493,7 @@ function initFirebase(config) {
     db.collection('library').doc(DOC_ID).get().then(() => {
       showScreen('login');
     }).catch(err => {
-      setSetupStatus('Erreur de connexion : vérifiez votre config. ' + err.message, 'err');
+      setSetupStatus('Erreur de connexion : ' + err.message, 'err');
       showScreen('setup');
     });
   } catch(e) { setSetupStatus('Erreur : ' + e.message, 'err'); }
@@ -480,19 +511,20 @@ function showScreen(name) {
 function startRealtimeSync() {
   if (unsubscribe) unsubscribe();
   setSyncStatus('syncing', 'Synchronisation...');
-
   unsubscribe = db.collection('library').doc(DOC_ID).onSnapshot(doc => {
     if (doc.exists) {
       data = doc.data();
       if (!data.sections) data.sections = [...DEFAULT_SECTIONS];
       if (!data.items) data.items = {};
       if (!data.taskStatuses) data.taskStatuses = {};
+      if (!data.folders) data.folders = {};
     } else {
-      data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {} };
+      data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {}, folders: {} };
       saveToFirestore();
     }
     if (!activeSection || !data.sections.find(s => s.id === activeSection)) {
       activeSection = data.sections[0]?.id || null;
+      currentFolder = null;
     }
     renderSidebar(); renderContent();
     setSyncStatus('ok', 'Synchronisé');
@@ -501,7 +533,6 @@ function startRealtimeSync() {
     setSyncStatus('error', 'Erreur de sync');
   });
 }
-
 function saveToFirestore() {
   if (!db) return;
   setSyncStatus('syncing', 'Sauvegarde...');
@@ -512,7 +543,6 @@ function saveToFirestore() {
     setSyncStatus('error', 'Erreur');
   });
 }
-
 function setSyncStatus(state, text) {
   const el = document.getElementById('sync-status');
   if (!el) return;
@@ -534,7 +564,6 @@ function doLogin() {
     box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
   }
 }
-
 function doLogout() {
   if (unsubscribe) unsubscribe();
   sessionStorage.removeItem('mylib-auth');
@@ -566,12 +595,104 @@ function renderSidebar() {
       '</button>';
   }).join('');
 }
-
 function setSection(id) {
-  activeSection = id; renderSidebar(); renderContent();
+  activeSection = id; currentFolder = null;
+  renderSidebar(); renderContent();
   document.getElementById('sidebar').classList.remove('open');
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ── Folders ──
+function getFolderPath(folderId) {
+  // Returns array of folder objects from root to folderId
+  const path = [];
+  let current = folderId;
+  while (current) {
+    const folder = data.folders[current];
+    if (!folder) break;
+    path.unshift(folder);
+    current = folder.parentId;
+  }
+  return path;
+}
+
+function getSubFolders(sectionId, parentId) {
+  return Object.values(data.folders).filter(f =>
+    f.sectionId === sectionId && (f.parentId || null) === (parentId || null)
+  ).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+function getItemsInFolder(sectionId, folderId) {
+  return Object.values(data.items).filter(i =>
+    i.sectionId === sectionId && (i.folderId || null) === (folderId || null)
+  );
+}
+
+function renderBreadcrumb() {
+  const bar = document.getElementById('breadcrumb-bar');
+  const section = data.sections.find(s => s.id === activeSection);
+  if (!section || !currentFolder) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  const path = getFolderPath(currentFolder);
+  let html = '<button class="breadcrumb-item" onclick="navigateFolder(null)">' + section.icon + ' ' + esc(section.name) + '</button>';
+  path.forEach((f, i) => {
+    html += '<span class="breadcrumb-sep">›</span>';
+    const isCurrent = i === path.length - 1;
+    html += '<button class="breadcrumb-item ' + (isCurrent?'current':'') + '" onclick="navigateFolder(\'' + f.id + '\')">' +
+      '📁 ' + esc(f.name) + '</button>';
+  });
+  bar.innerHTML = html;
+}
+
+function navigateFolder(folderId) {
+  currentFolder = folderId;
+  renderContent();
+}
+
+function openAddFolder() {
+  document.getElementById('folder-name').value = '';
+  openModal('modal-add-folder');
+}
+
+function addFolder() {
+  const name = document.getElementById('folder-name').value.trim();
+  if (!name || !activeSection) return;
+  const id = 'folder_' + Date.now();
+  data.folders[id] = {
+    id, name, sectionId: activeSection,
+    parentId: currentFolder || null,
+    createdAt: new Date().toISOString(),
+  };
+  saveToFirestore(); closeModal('modal-add-folder');
+}
+
+function deleteFolder(id) {
+  if (!confirm('Supprimer ce dossier et tout son contenu ?')) return;
+  // Recursively delete subfolders and items
+  const toDelete = [id];
+  function findChildren(parentId) {
+    Object.values(data.folders).forEach(f => {
+      if (f.parentId === parentId) {
+        toDelete.push(f.id);
+        findChildren(f.id);
+      }
+    });
+  }
+  findChildren(id);
+  // Delete all items in those folders
+  Object.keys(data.items).forEach(k => {
+    if (toDelete.includes(data.items[k].folderId)) {
+      delete data.items[k]; delete data.taskStatuses[k];
+    }
+  });
+  // Delete folders
+  toDelete.forEach(fid => delete data.folders[fid]);
+  if (currentFolder === id) currentFolder = data.folders[id]?.parentId || null;
+  saveToFirestore();
+}
 
 // ── Content ──
 function renderContent() {
@@ -579,34 +700,75 @@ function renderContent() {
   const content = document.getElementById('content');
   if (!section || !content) return;
   document.getElementById('section-title').textContent = section.icon + ' ' + section.name;
+  renderBreadcrumb();
+
   const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const subfolders = getSubFolders(activeSection, currentFolder);
 
-  let items = Object.values(data.items)
-    .filter(i => i.sectionId === activeSection)
-    .filter(i => !query || i.title.toLowerCase().includes(query) || (i.description||'').toLowerCase().includes(query))
-    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  let items;
+  if (query) {
+    // Search across all folders in section
+    items = Object.values(data.items)
+      .filter(i => i.sectionId === activeSection)
+      .filter(i => i.title.toLowerCase().includes(query) || (i.description||'').toLowerCase().includes(query))
+      .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else {
+    items = getItemsInFolder(activeSection, currentFolder)
+      .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
 
-  if (items.length === 0) {
-    content.innerHTML = '<div class="empty-state"><div class="big-icon">' + section.icon +
+  let html = '';
+
+  // Folders row (only when not searching)
+  if (!query) {
+    html += '<div class="folders-row">';
+    subfolders.forEach(f => {
+      const itemCount = getItemsInFolder(activeSection, f.id).length;
+      const subCount = getSubFolders(activeSection, f.id).length;
+      let countLabel = itemCount + ' élément' + (itemCount>1?'s':'');
+      if (subCount > 0) countLabel += ', ' + subCount + ' dossier' + (subCount>1?'s':'');
+      html += '<div class="folder-card" onclick="navigateFolder(\'' + f.id + '\')">' +
+        '<span class="folder-icon">📁</span>' +
+        '<div><div class="folder-name">' + esc(f.name) + '</div>' +
+        '<div class="folder-count">' + countLabel + '</div></div>' +
+        '<button class="folder-delete" onclick="event.stopPropagation();deleteFolder(\'' + f.id + '\')" title="Supprimer">✕</button>' +
+        '</div>';
+    });
+    html += '<button class="btn-add-folder" onclick="openAddFolder()"><span>+</span> Nouveau dossier</button>';
+    html += '</div>';
+  }
+
+  if (items.length === 0 && subfolders.length === 0 && !query) {
+    html = '<div class="empty-state"><div class="big-icon">' + section.icon +
       '</div><div style="font-size:15px">Aucun élément</div>' +
-      '<div style="font-size:12px;margin-top:4px;opacity:0.6">Cliquez sur « + Ajouter »</div></div>';
+      '<div style="font-size:12px;margin-top:4px;opacity:0.6">Créez un dossier ou ajoutez un élément</div></div>';
+    content.innerHTML = html;
     return;
   }
-  if (activeSection === 'tasks') renderTasks(items, content);
-  else renderCards(items, content);
-}
 
-function renderCards(items, container) {
-  container.innerHTML = '<div class="cards-grid">' + items.map(item =>
-    '<div class="card" onclick="viewItem(\'' + item.id + '\')">' +
-    '<div class="card-title">' + esc(item.title) + '</div>' +
-    (item.description ? '<div class="card-desc">' + esc(item.description) + '</div>' : '') +
-    (item.code ? '<div class="card-code">' + esc(item.code.substring(0,60)) + '…</div>' : '') +
-    '<div class="card-date">' + fmtDate(item.createdAt) + '</div></div>'
-  ).join('') + '</div>';
+  if (activeSection === 'tasks') {
+    content.innerHTML = html;
+    const taskContainer = document.createElement('div');
+    content.appendChild(taskContainer);
+    renderTasks(items, taskContainer);
+  } else {
+    if (items.length > 0) {
+      html += '<div class="cards-grid">' + items.map(item =>
+        '<div class="card" onclick="viewItem(\'' + item.id + '\')">' +
+        '<div class="card-title">' + esc(item.title) + '</div>' +
+        (item.description ? '<div class="card-desc">' + esc(item.description) + '</div>' : '') +
+        (item.code ? '<div class="card-code">' + esc(item.code.substring(0,60)) + '…</div>' : '') +
+        '<div class="card-date">' + fmtDate(item.createdAt) + '</div></div>'
+      ).join('') + '</div>';
+    } else if (query) {
+      html += '<div class="empty-state"><div style="font-size:15px">Aucun résultat</div></div>';
+    }
+    content.innerHTML = html;
+  }
 }
 
 function renderTasks(items, container) {
+  if (items.length === 0) return;
   const groups = { doing:[], todo:[], done:[] };
   items.forEach(i => { groups[data.taskStatuses[i.id] || 'todo'].push(i); });
   const labels = { todo:'À faire', doing:'En cours', done:'Terminé' };
@@ -657,6 +819,7 @@ function addItem() {
     code: document.getElementById('item-code').value.trim(),
     createdAt: new Date().toISOString(),
     sectionId: activeSection,
+    folderId: currentFolder || null,
   };
   if (activeSection === 'tasks') data.taskStatuses[id] = 'todo';
   saveToFirestore(); closeModal('modal-add-item');
@@ -672,8 +835,15 @@ function viewItem(id) {
     body += '<div class="code-block"><pre>' + esc(item.code) + '</pre>' +
       '<button class="btn-copy" onclick="copyCode(this,\'' + id + '\')">Copier</button></div>';
   }
-  body += '<div class="modal-footer"><span class="date">Créé le ' + fmtDate(item.createdAt) + '</span>' +
-    '<button class="btn-delete" onclick="deleteItem(\'' + id + '\');closeModal(\'modal-view-item\')">Supprimer</button></div>';
+  // Show folder path
+  let folderLabel = '';
+  if (item.folderId && data.folders[item.folderId]) {
+    const path = getFolderPath(item.folderId);
+    folderLabel = '📁 ' + path.map(f => f.name).join(' › ');
+  }
+  body += '<div class="modal-footer"><div><span class="date">Créé le ' + fmtDate(item.createdAt) + '</span>' +
+    (folderLabel ? '<br><span class="date">' + folderLabel + '</span>' : '') +
+    '</div><button class="btn-delete" onclick="deleteItem(\'' + id + '\');closeModal(\'modal-view-item\')">Supprimer</button></div>';
   document.getElementById('view-item-body').innerHTML = body;
   openModal('modal-view-item');
 }
@@ -698,23 +868,25 @@ function openAddSection() {
   document.getElementById('section-color').value = '#6366F1';
   openModal('modal-add-section');
 }
-
 function addSection() {
   const name = document.getElementById('section-name').value.trim();
   if (!name) return;
   const id = 'section_' + Date.now();
   data.sections.push({ id, name, icon: document.getElementById('section-icon').value || '📁',
     color: document.getElementById('section-color').value });
-  activeSection = id; saveToFirestore(); closeModal('modal-add-section');
+  activeSection = id; currentFolder = null;
+  saveToFirestore(); closeModal('modal-add-section');
 }
-
 function deleteSection(id) {
-  if (!confirm('Supprimer cette section et tous ses éléments ?')) return;
+  if (!confirm('Supprimer cette section et tout son contenu ?')) return;
   data.sections = data.sections.filter(s => s.id !== id);
   Object.keys(data.items).forEach(k => {
     if (data.items[k].sectionId === id) { delete data.items[k]; delete data.taskStatuses[k]; }
   });
-  if (activeSection === id) activeSection = data.sections[0]?.id || null;
+  Object.keys(data.folders).forEach(k => {
+    if (data.folders[k].sectionId === id) delete data.folders[k];
+  });
+  if (activeSection === id) { activeSection = data.sections[0]?.id || null; currentFolder = null; }
   saveToFirestore();
 }
 
@@ -734,7 +906,7 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 function fmtDate(iso) { return new Date(iso).toLocaleDateString('fr-FR'); }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') ['modal-add-item','modal-view-item','modal-add-section'].forEach(closeModal);
+  if (e.key === 'Escape') ['modal-add-item','modal-view-item','modal-add-section','modal-add-folder'].forEach(closeModal);
 });
 
 // ── Init ──
