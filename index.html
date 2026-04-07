@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma Bibliothèque</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F1117; --surface: #1A1D27; --surface-hover: #232736;
+  --border: #2A2E3B; --text: #E4E5EA; --text-muted: #8B8FA3;
+  --accent: #E86F3C; --accent-soft: rgba(232,111,60,0.12);
+  --danger: #EF4444; --success: #22C55E; --warning: #F59E0B;
+  --font: 'DM Sans', sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height:100vh; }
+input, textarea, select, button { font-family: var(--font); }
+::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* Login */
+#login-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(232,111,60,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(139,92,246,0.06) 0%, transparent 50%), var(--bg);
+}
+.login-box {
+  width:380px; padding:40px; background:var(--surface); border-radius:16px;
+  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  animation: fadeIn 0.6s ease;
+}
+.login-box h1 { color:var(--text); font-size:22px; font-weight:700; }
+.login-box p { color:var(--text-muted); font-size:13px; margin-top:6px; }
+.login-box .icon { font-size:40px; margin-bottom:8px; text-align:center; }
+.login-box .center { text-align:center; margin-bottom:32px; }
+.login-error { color:var(--danger); font-size:13px; text-align:center; min-height:20px; }
+.login-hint { color:var(--text-muted); font-size:11px; text-align:center; margin-top:20px; opacity:0.6; }
+
+/* Setup */
+#setup-screen {
+  min-height:100vh; display:none; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(232,111,60,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(139,92,246,0.06) 0%, transparent 50%), var(--bg);
+}
+.setup-box {
+  width:520px; padding:40px; background:var(--surface); border-radius:16px;
+  border:1px solid var(--border); box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  animation: fadeIn 0.6s ease;
+}
+.setup-box h1 { color:var(--text); font-size:20px; font-weight:700; margin-bottom:6px; }
+.setup-box .sub { color:var(--text-muted); font-size:13px; margin-bottom:24px; line-height:1.6; }
+.setup-box label { color:var(--text-muted); font-size:12px; display:block; margin-bottom:4px; font-weight:500; }
+.setup-box .field { margin-bottom:14px; }
+.setup-status { margin-top:12px; font-size:13px; text-align:center; min-height:20px; }
+.setup-status.ok { color:var(--success); }
+.setup-status.err { color:var(--danger); }
+
+/* Inputs */
+.input {
+  width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+  background:var(--bg); color:var(--text); font-size:14px; outline:none; transition:border 0.2s;
+}
+.input:focus { border-color: var(--accent); }
+.input-sm { padding:8px 14px; font-size:13px; }
+textarea.input { resize:vertical; line-height:1.6; }
+.btn-primary {
+  width:100%; padding:12px 0; border-radius:10px; border:none; cursor:pointer;
+  background:var(--accent); color:#fff; font-size:14px; font-weight:600; transition:opacity 0.2s;
+}
+.btn-primary:hover { opacity:0.9; }
+.btn-sm { width:auto; padding:8px 18px; border-radius:8px; font-size:13px; }
+.form-group { display:flex; flex-direction:column; gap:14px; }
+
+/* Layout */
+#app { display:none; min-height:100vh; }
+.layout { display:flex; min-height:100vh; }
+.sidebar {
+  width:260px; background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; flex-shrink:0;
+  position:fixed; top:0; left:0; bottom:0; z-index:100;
+}
+.main { flex:1; margin-left:260px; display:flex; flex-direction:column; min-width:0; }
+
+.sidebar-header { padding:24px 20px; border-bottom:1px solid var(--border); }
+.sidebar-header .logo { display:flex; align-items:center; gap:10px; }
+.sidebar-header .logo-icon { font-size:26px; }
+.sidebar-header .logo-title { font-weight:700; font-size:16px; }
+.sidebar-header .logo-sub { color:var(--text-muted); font-size:11px; }
+.sidebar-nav { flex:1; padding:12px 10px; overflow-y:auto; }
+.sidebar-label {
+  color:var(--text-muted); font-size:10px; font-weight:600;
+  text-transform:uppercase; letter-spacing:1.2px; padding:8px 10px;
+}
+.nav-item {
+  width:100%; display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px; border:none; cursor:pointer;
+  background:transparent; color:var(--text-muted); font-size:13px;
+  text-align:left; transition:all 0.15s; position:relative;
+}
+.nav-item:hover { background:var(--surface-hover); }
+.nav-item.active { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+.nav-item .icon { font-size:18px; flex-shrink:0; }
+.nav-item .label { flex:1; }
+.nav-item .count { font-size:11px; opacity:0.5; }
+.nav-item .delete-section {
+  position:absolute; right:6px; background:none; border:none;
+  color:var(--text-muted); cursor:pointer; font-size:12px; opacity:0; transition:opacity 0.15s;
+}
+.nav-item:hover .delete-section { opacity:0.5; }
+.nav-item .delete-section:hover { opacity:1; color:var(--danger); }
+.btn-add-section {
+  width:100%; display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px; border:1px dashed var(--border);
+  background:transparent; color:var(--text-muted); font-size:13px;
+  cursor:pointer; margin-top:6px; transition:all 0.15s;
+}
+.btn-add-section:hover { border-color:var(--text-muted); }
+.sidebar-footer { padding:12px 14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+.btn-outline {
+  width:100%; padding:8px 0; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text-muted); font-size:12px; cursor:pointer; transition:all 0.15s;
+}
+.btn-outline:hover { border-color:var(--text-muted); }
+.btn-backup { font-size:11px; }
+.sync-indicator {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:11px; color:var(--success); padding:4px 0;
+}
+.sync-indicator.syncing { color:var(--warning); }
+.sync-indicator.error { color:var(--danger); }
+
+.header {
+  padding:18px 28px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:16px;
+}
+.header h2 { flex:1; font-size:20px; font-weight:700; margin:0; }
+
+.content { flex:1; overflow-y:auto; padding:28px; }
+.empty-state { text-align:center; padding:80px 0; color:var(--text-muted); }
+.empty-state .big-icon { font-size:48px; margin-bottom:12px; opacity:0.3; }
+
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+.card {
+  background:var(--surface-hover); border-radius:12px; padding:18px; cursor:pointer;
+  border:1px solid var(--border); transition:border 0.15s;
+}
+.card:hover { border-color:var(--text-muted); }
+.card-title { font-size:14px; font-weight:600; margin-bottom:6px; }
+.card-desc {
+  color:var(--text-muted); font-size:12px; line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.card-code {
+  margin-top:8px; padding:6px 10px; background:var(--bg); border-radius:6px;
+  font-size:11px; font-family:var(--mono); color:var(--text-muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.card-date { color:var(--text-muted); font-size:10px; margin-top:10px; opacity:0.5; }
+
+.task-group-label {
+  color:var(--text-muted); font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;
+}
+.task-row {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.task-btn {
+  width:28px; height:28px; border-radius:8px; border:2px solid var(--text-muted);
+  background:transparent; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; color:#fff; font-size:14px; flex-shrink:0; transition:all 0.15s;
+}
+.task-btn.todo { border-color:var(--text-muted); }
+.task-btn.doing { border-color:var(--warning); }
+.task-btn.done { border-color:var(--success); background:var(--success); }
+.task-title { flex:1; font-size:14px; }
+.task-title.completed { color:var(--text-muted); text-decoration:line-through; }
+.task-desc { color:var(--text-muted); font-size:12px; margin-top:2px; }
+.task-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:500; }
+.task-badge.todo { background:rgba(139,143,163,0.13); color:var(--text-muted); }
+.task-badge.doing { background:rgba(245,158,11,0.13); color:var(--warning); }
+.task-badge.done { background:rgba(34,197,94,0.13); color:var(--success); }
+
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex;
+  align-items:center; justify-content:center; z-index:1000; animation:fadeIn 0.2s ease;
+}
+.modal {
+  width:480px; max-width:90vw; max-height:80vh; overflow:auto;
+  background:var(--surface); border-radius:16px; border:1px solid var(--border);
+  padding:28px; box-shadow:0 24px 80px rgba(0,0,0,0.5);
+}
+.modal-lg { width:600px; }
+.modal-header {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
+}
+.modal-header h3 { font-size:18px; font-weight:600; margin:0; }
+.modal-close {
+  background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;
+}
+.code-block { position:relative; margin-top:8px; }
+.code-block pre {
+  background:var(--bg); border-radius:10px; padding:16px; font-size:12px;
+  font-family:var(--mono); color:#C9D1D9; overflow-x:auto;
+  border:1px solid var(--border); line-height:1.6; white-space:pre-wrap; max-height:300px;
+}
+.btn-copy {
+  position:absolute; top:8px; right:8px; background:var(--surface-hover);
+  border:1px solid var(--border); border-radius:6px; padding:4px 10px;
+  color:var(--text-muted); font-size:11px; cursor:pointer;
+}
+.btn-copy.copied { color:var(--success); }
+.btn-delete {
+  padding:6px 16px; border-radius:8px; border:1px solid rgba(239,68,68,0.2);
+  background:rgba(239,68,68,0.07); color:var(--danger); font-size:12px; cursor:pointer;
+}
+.modal-footer { display:flex; justify-content:space-between; align-items:center; margin-top:20px; }
+.modal-footer .date { color:var(--text-muted); font-size:11px; }
+
+.loading-overlay {
+  position:fixed; inset:0; background:var(--bg); display:flex;
+  align-items:center; justify-content:center; z-index:2000; flex-direction:column; gap:16px;
+}
+.spinner {
+  width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent);
+  border-radius:50%; animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.mobile-menu-btn {
+  display:none; background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;
+}
+@media (max-width:768px) {
+  .sidebar { transform:translateX(-100%); transition:transform 0.3s; }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .mobile-menu-btn { display:block; }
+  .cards-grid { grid-template-columns:1fr; }
+  .login-box, .setup-box { width:90vw; padding:28px; }
+}
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+.shake { animation: shake 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="spinner"></div>
+  <div style="color:var(--text-muted);font-size:14px">Chargement...</div>
+</div>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <div class="setup-box">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:40px;margin-bottom:8px">🔧</div>
+      <h1>Configuration Firebase</h1>
+      <p class="sub">Colle ici ta configuration Firebase pour synchroniser tes données partout.<br>
+      Console Firebase → Paramètres du projet → Config.</p>
+    </div>
+    <div class="field">
+      <label>apiKey</label>
+      <input class="input input-sm" id="cfg-apiKey" placeholder="AIzaSy...">
+    </div>
+    <div class="field">
+      <label>authDomain</label>
+      <input class="input input-sm" id="cfg-authDomain" placeholder="mon-projet.firebaseapp.com">
+    </div>
+    <div class="field">
+      <label>projectId</label>
+      <input class="input input-sm" id="cfg-projectId" placeholder="mon-projet">
+    </div>
+    <div class="field">
+      <label>storageBucket</label>
+      <input class="input input-sm" id="cfg-storageBucket" placeholder="mon-projet.firebasestorage.app">
+    </div>
+    <div class="field">
+      <label>messagingSenderId</label>
+      <input class="input input-sm" id="cfg-messagingSenderId" placeholder="123456789">
+    </div>
+    <div class="field">
+      <label>appId</label>
+      <input class="input input-sm" id="cfg-appId" placeholder="1:123456789:web:abc123">
+    </div>
+    <div class="setup-status" id="setup-status"></div>
+    <button class="btn-primary" onclick="saveFirebaseConfig()" style="margin-top:8px">Connecter à Firebase</button>
+    <p style="color:var(--text-muted);font-size:11px;text-align:center;margin-top:16px;opacity:0.6">
+      Config stockée localement. À re-saisir sur un nouvel appareil (une seule fois).
+    </p>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" style="display:none">
+  <div class="login-box" id="login-box">
+    <div class="center">
+      <div class="icon">📚</div>
+      <h1>Ma Bibliothèque</h1>
+      <p>Espace personnel sécurisé</p>
+    </div>
+    <div class="form-group">
+      <input class="input" id="login-user" placeholder="Identifiant" autocomplete="username">
+      <input class="input" id="login-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-primary" onclick="doLogin()">Se connecter</button>
+    </div>
+    <p class="login-hint">Par défaut : admin / admin123</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">📚</span>
+        <div>
+          <div class="logo-title">Ma Bibliothèque</div>
+          <div class="logo-sub" id="stats-label">0 éléments</div>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-label">Sections</div>
+      <div id="nav-list"></div>
+      <button class="btn-add-section" onclick="openAddSection()">
+        <span style="font-size:16px">+</span> Nouvelle section
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sync-indicator" id="sync-status"><span>●</span> Connecté</div>
+      <button class="btn-outline btn-backup" onclick="exportData()">📥 Exporter sauvegarde</button>
+      <button class="btn-outline btn-backup" onclick="resetConfig()">⚙️ Reconfigurer Firebase</button>
+      <button class="btn-outline" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <h2 id="section-title">—</h2>
+      <input class="input input-sm" id="search-input" placeholder="Rechercher..." style="width:220px" oninput="renderContent()">
+      <button class="btn-primary btn-sm" onclick="openAddItem()">+ Ajouter</button>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-add-item" style="display:none" onclick="closeModal('modal-add-item')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-add-title">Ajouter</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-item')">✕</button>
+    </div>
+    <div class="form-group">
+      <input class="input" id="item-title" placeholder="Titre *">
+      <textarea class="input" id="item-desc" placeholder="Description / Notes" rows="3"></textarea>
+      <textarea class="input" id="item-code" placeholder="Code (VBA, formule, snippet…)" rows="6"
+        style="font-family:var(--mono);font-size:12px;display:none"></textarea>
+      <button class="btn-primary" onclick="addItem()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-view-item" style="display:none" onclick="closeModal('modal-view-item')">
+  <div class="modal modal-lg" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="view-item-title"></h3>
+      <button class="modal-close" onclick="closeModal('modal-view-item')">✕</button>
+    </div>
+    <div id="view-item-body"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-section" style="display:none" onclick="closeModal('modal-add-section')">
+  <div class="modal" style="width:400px" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nouvelle section</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-section')">✕</button>
+    </div>
+    <div class="form-group">
+      <input class="input" id="section-name" placeholder="Nom de la section *">
+      <div style="display:flex;gap:12px">
+        <div style="flex:1">
+          <label style="color:var(--text-muted);font-size:12px;margin-bottom:4px;display:block">Icône</label>
+          <input class="input" id="section-icon" value="📁" style="text-align:center;font-size:22px">
+        </div>
+        <div style="flex:1">
+          <label style="color:var(--text-muted);font-size:12px;margin-bottom:4px;display:block">Couleur</label>
+          <input type="color" class="input" id="section-color" value="#6366F1" style="height:46px;padding:4px;cursor:pointer">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addSection()">Créer la section</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+const CONFIG_KEY = 'mylib-firebase-config';
+const CRED = { username: 'admin', password: 'admin123' };
+const DEFAULT_SECTIONS = [
+  { id:'vba', name:'Codes VBA / Macros', icon:'⚙️', color:'#E86F3C' },
+  { id:'excel', name:'Fichiers Excel', icon:'📊', color:'#217346' },
+  { id:'tasks', name:'Suivi de tâches', icon:'✅', color:'#3B82F6' },
+  { id:'notes', name:'Notes & Documentation', icon:'📝', color:'#8B5CF6' },
+];
+const DEFAULT_IDS = DEFAULT_SECTIONS.map(s => s.id);
+const DOC_ID = 'main';
+
+let db = null;
+let data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {} };
+let activeSection = null;
+let unsubscribe = null;
+
+// ── Config ──
+function getStoredConfig() {
+  try { return JSON.parse(localStorage.getItem(CONFIG_KEY)); } catch { return null; }
+}
+
+function saveFirebaseConfig() {
+  const fields = ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
+  const config = {};
+  for (const f of fields) {
+    const val = document.getElementById('cfg-' + f).value.trim();
+    if (!val) { setSetupStatus('Remplis tous les champs', 'err'); return; }
+    config[f] = val;
+  }
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+    setSetupStatus('Connexion...', '');
+    initFirebase(config);
+  } catch(e) { setSetupStatus('Erreur : ' + e.message, 'err'); }
+}
+
+function setSetupStatus(msg, cls) {
+  const el = document.getElementById('setup-status');
+  el.textContent = msg; el.className = 'setup-status ' + (cls || '');
+}
+
+function resetConfig() {
+  if (!confirm('Reconfigurer Firebase ?')) return;
+  if (unsubscribe) unsubscribe();
+  localStorage.removeItem(CONFIG_KEY);
+  showScreen('setup');
+}
+
+function initFirebase(config) {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(config);
+    db = firebase.firestore();
+    db.collection('library').doc(DOC_ID).get().then(() => {
+      showScreen('login');
+    }).catch(err => {
+      setSetupStatus('Erreur de connexion : vérifiez votre config. ' + err.message, 'err');
+      showScreen('setup');
+    });
+  } catch(e) { setSetupStatus('Erreur : ' + e.message, 'err'); }
+}
+
+// ── Screens ──
+function showScreen(name) {
+  document.getElementById('setup-screen').style.display = name === 'setup' ? 'flex' : 'none';
+  document.getElementById('login-screen').style.display = name === 'login' ? 'flex' : 'none';
+  document.getElementById('app').style.display = name === 'app' ? 'block' : 'none';
+  document.getElementById('loading').style.display = name === 'loading' ? 'flex' : 'none';
+}
+
+// ── Firestore ──
+function startRealtimeSync() {
+  if (unsubscribe) unsubscribe();
+  setSyncStatus('syncing', 'Synchronisation...');
+
+  unsubscribe = db.collection('library').doc(DOC_ID).onSnapshot(doc => {
+    if (doc.exists) {
+      data = doc.data();
+      if (!data.sections) data.sections = [...DEFAULT_SECTIONS];
+      if (!data.items) data.items = {};
+      if (!data.taskStatuses) data.taskStatuses = {};
+    } else {
+      data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {} };
+      saveToFirestore();
+    }
+    if (!activeSection || !data.sections.find(s => s.id === activeSection)) {
+      activeSection = data.sections[0]?.id || null;
+    }
+    renderSidebar(); renderContent();
+    setSyncStatus('ok', 'Synchronisé');
+  }, err => {
+    console.error('Firestore error:', err);
+    setSyncStatus('error', 'Erreur de sync');
+  });
+}
+
+function saveToFirestore() {
+  if (!db) return;
+  setSyncStatus('syncing', 'Sauvegarde...');
+  db.collection('library').doc(DOC_ID).set(data).then(() => {
+    setSyncStatus('ok', 'Synchronisé');
+  }).catch(err => {
+    console.error('Save error:', err);
+    setSyncStatus('error', 'Erreur');
+  });
+}
+
+function setSyncStatus(state, text) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = 'sync-indicator ' + (state === 'ok' ? '' : state);
+  el.innerHTML = '<span>●</span> ' + text;
+}
+
+// ── Auth ──
+function doLogin() {
+  const u = document.getElementById('login-user').value;
+  const p = document.getElementById('login-pass').value;
+  if (u === CRED.username && p === CRED.password) {
+    sessionStorage.setItem('mylib-auth', '1');
+    showScreen('app');
+    startRealtimeSync();
+  } else {
+    document.getElementById('login-error').textContent = 'Identifiants incorrects';
+    const box = document.getElementById('login-box');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+  }
+}
+
+function doLogout() {
+  if (unsubscribe) unsubscribe();
+  sessionStorage.removeItem('mylib-auth');
+  showScreen('login');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').textContent = '';
+}
+
+// ── Sidebar ──
+function renderSidebar() {
+  const list = document.getElementById('nav-list');
+  if (!list) return;
+  const totalItems = Object.keys(data.items).length;
+  const totalTasks = Object.values(data.items).filter(i => i.sectionId === 'tasks').length;
+  const doneTasks = Object.entries(data.taskStatuses).filter(([,s]) => s === 'done').length;
+  document.getElementById('stats-label').textContent =
+    totalItems + ' élément' + (totalItems>1?'s':'') + ' · ' + doneTasks + '/' + totalTasks + ' tâches';
+
+  list.innerHTML = data.sections.map(s => {
+    const count = Object.values(data.items).filter(i => i.sectionId === s.id).length;
+    const isActive = activeSection === s.id;
+    const canDelete = !DEFAULT_IDS.includes(s.id);
+    return '<button class="nav-item ' + (isActive?'active':'') + '" onclick="setSection(\'' + s.id + '\')">' +
+      '<span class="icon">' + s.icon + '</span>' +
+      '<span class="label">' + esc(s.name) + '</span>' +
+      '<span class="count">' + count + '</span>' +
+      (canDelete ? '<span class="delete-section" onclick="event.stopPropagation();deleteSection(\'' + s.id + '\')" title="Supprimer">✕</span>' : '') +
+      '</button>';
+  }).join('');
+}
+
+function setSection(id) {
+  activeSection = id; renderSidebar(); renderContent();
+  document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+// ── Content ──
+function renderContent() {
+  const section = data.sections.find(s => s.id === activeSection);
+  const content = document.getElementById('content');
+  if (!section || !content) return;
+  document.getElementById('section-title').textContent = section.icon + ' ' + section.name;
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+
+  let items = Object.values(data.items)
+    .filter(i => i.sectionId === activeSection)
+    .filter(i => !query || i.title.toLowerCase().includes(query) || (i.description||'').toLowerCase().includes(query))
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  if (items.length === 0) {
+    content.innerHTML = '<div class="empty-state"><div class="big-icon">' + section.icon +
+      '</div><div style="font-size:15px">Aucun élément</div>' +
+      '<div style="font-size:12px;margin-top:4px;opacity:0.6">Cliquez sur « + Ajouter »</div></div>';
+    return;
+  }
+  if (activeSection === 'tasks') renderTasks(items, content);
+  else renderCards(items, content);
+}
+
+function renderCards(items, container) {
+  container.innerHTML = '<div class="cards-grid">' + items.map(item =>
+    '<div class="card" onclick="viewItem(\'' + item.id + '\')">' +
+    '<div class="card-title">' + esc(item.title) + '</div>' +
+    (item.description ? '<div class="card-desc">' + esc(item.description) + '</div>' : '') +
+    (item.code ? '<div class="card-code">' + esc(item.code.substring(0,60)) + '…</div>' : '') +
+    '<div class="card-date">' + fmtDate(item.createdAt) + '</div></div>'
+  ).join('') + '</div>';
+}
+
+function renderTasks(items, container) {
+  const groups = { doing:[], todo:[], done:[] };
+  items.forEach(i => { groups[data.taskStatuses[i.id] || 'todo'].push(i); });
+  const labels = { todo:'À faire', doing:'En cours', done:'Terminé' };
+
+  container.innerHTML = '<div style="max-width:700px">' +
+    ['doing','todo','done'].map(status => {
+      if (!groups[status].length) return '';
+      return '<div style="margin-bottom:24px"><div class="task-group-label">' +
+        labels[status] + ' (' + groups[status].length + ')</div>' +
+        groups[status].map(item =>
+          '<div class="task-row">' +
+          '<button class="task-btn ' + status + '" onclick="cycleTask(\'' + item.id + '\')">' +
+          (status === 'done' ? '✓' : '') + '</button>' +
+          '<div style="flex:1"><div class="task-title ' + (status==='done'?'completed':'') + '">' +
+          esc(item.title) + '</div>' +
+          (item.description ? '<div class="task-desc">' + esc(item.description) + '</div>' : '') +
+          '</div><span class="task-badge ' + status + '">' + labels[status] + '</span>' +
+          '<button class="modal-close" onclick="deleteItem(\'' + item.id + '\')" title="Supprimer" style="font-size:14px;margin-left:4px">✕</button></div>'
+        ).join('') + '</div>';
+    }).join('') + '</div>';
+}
+
+function cycleTask(id) {
+  const order = { todo:'doing', doing:'done', done:'todo' };
+  data.taskStatuses[id] = order[data.taskStatuses[id] || 'todo'];
+  saveToFirestore();
+}
+
+// ── Items ──
+function openAddItem() {
+  const section = data.sections.find(s => s.id === activeSection);
+  document.getElementById('modal-add-title').textContent = 'Ajouter — ' + (section?.name || '');
+  document.getElementById('item-title').value = '';
+  document.getElementById('item-desc').value = '';
+  document.getElementById('item-code').value = '';
+  const showCode = activeSection === 'vba' || !DEFAULT_IDS.includes(activeSection);
+  document.getElementById('item-code').style.display = showCode ? 'block' : 'none';
+  openModal('modal-add-item');
+}
+
+function addItem() {
+  const title = document.getElementById('item-title').value.trim();
+  if (!title || !activeSection) return;
+  const id = 'item_' + Date.now();
+  data.items[id] = {
+    id, title,
+    description: document.getElementById('item-desc').value.trim(),
+    code: document.getElementById('item-code').value.trim(),
+    createdAt: new Date().toISOString(),
+    sectionId: activeSection,
+  };
+  if (activeSection === 'tasks') data.taskStatuses[id] = 'todo';
+  saveToFirestore(); closeModal('modal-add-item');
+}
+
+function viewItem(id) {
+  const item = data.items[id];
+  if (!item) return;
+  document.getElementById('view-item-title').textContent = item.title;
+  let body = '';
+  if (item.description) body += '<p style="color:var(--text-muted);font-size:14px;line-height:1.7">' + esc(item.description) + '</p>';
+  if (item.code) {
+    body += '<div class="code-block"><pre>' + esc(item.code) + '</pre>' +
+      '<button class="btn-copy" onclick="copyCode(this,\'' + id + '\')">Copier</button></div>';
+  }
+  body += '<div class="modal-footer"><span class="date">Créé le ' + fmtDate(item.createdAt) + '</span>' +
+    '<button class="btn-delete" onclick="deleteItem(\'' + id + '\');closeModal(\'modal-view-item\')">Supprimer</button></div>';
+  document.getElementById('view-item-body').innerHTML = body;
+  openModal('modal-view-item');
+}
+
+function deleteItem(id) {
+  if (!confirm('Supprimer cet élément ?')) return;
+  delete data.items[id]; delete data.taskStatuses[id];
+  saveToFirestore();
+}
+
+function copyCode(btn, id) {
+  navigator.clipboard.writeText(data.items[id]?.code || '').then(() => {
+    btn.textContent = 'Copié ✓'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── Sections ──
+function openAddSection() {
+  document.getElementById('section-name').value = '';
+  document.getElementById('section-icon').value = '📁';
+  document.getElementById('section-color').value = '#6366F1';
+  openModal('modal-add-section');
+}
+
+function addSection() {
+  const name = document.getElementById('section-name').value.trim();
+  if (!name) return;
+  const id = 'section_' + Date.now();
+  data.sections.push({ id, name, icon: document.getElementById('section-icon').value || '📁',
+    color: document.getElementById('section-color').value });
+  activeSection = id; saveToFirestore(); closeModal('modal-add-section');
+}
+
+function deleteSection(id) {
+  if (!confirm('Supprimer cette section et tous ses éléments ?')) return;
+  data.sections = data.sections.filter(s => s.id !== id);
+  Object.keys(data.items).forEach(k => {
+    if (data.items[k].sectionId === id) { delete data.items[k]; delete data.taskStatuses[k]; }
+  });
+  if (activeSection === id) activeSection = data.sections[0]?.id || null;
+  saveToFirestore();
+}
+
+// ── Export ──
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ma-bibliotheque-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+// ── Utils ──
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtDate(iso) { return new Date(iso).toLocaleDateString('fr-FR'); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['modal-add-item','modal-view-item','modal-add-section'].forEach(closeModal);
+});
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  ['login-user','login-pass'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  });
+  const config = getStoredConfig();
+  if (config) initFirebase(config);
+  else showScreen('setup');
+});
+</script>
+</body>
+</html>
