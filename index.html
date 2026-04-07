@@ -279,6 +279,23 @@ textarea.input { resize:vertical; line-height:1.6; }
 @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 .shake { animation: shake 0.4s ease; }
+
+/* File links */
+.file-drop-zone {
+  border:2px dashed var(--border); border-radius:12px; padding:24px; text-align:center;
+  cursor:pointer; transition:all 0.2s; color:var(--text-muted); font-size:13px;
+}
+.file-attachment {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 14px;
+  background:var(--bg); border-radius:8px; border:1px solid var(--border);
+  font-size:12px; cursor:pointer; transition:all 0.15s; margin-top:6px;
+}
+.file-attachment:hover { border-color:var(--accent); color:var(--accent); }
+.file-badge {
+  display:inline-flex; align-items:center; gap:4px; padding:2px 8px;
+  background:rgba(33,115,70,0.15); color:#4ade80; border-radius:6px;
+  font-size:10px; font-weight:600; margin-top:6px;
+}
 </style>
 </head>
 <body>
@@ -385,6 +402,11 @@ textarea.input { resize:vertical; line-height:1.6; }
       <textarea class="input" id="item-desc" placeholder="Description / Notes" rows="3"></textarea>
       <textarea class="input" id="item-code" placeholder="Code (VBA, formule, snippet…)" rows="6"
         style="font-family:var(--mono);font-size:12px;display:none"></textarea>
+      <div id="file-links-zone" style="display:none">
+        <div style="color:var(--text-muted);font-size:12px;font-weight:500;margin-bottom:6px">📎 Liens vers fichiers (Google Drive, OneDrive, etc.)</div>
+        <div id="link-inputs-list"></div>
+        <button type="button" onclick="addLinkInput()" style="background:none;border:1px dashed var(--border);border-radius:8px;padding:8px 14px;color:var(--text-muted);font-size:12px;cursor:pointer;width:100%;margin-top:6px;font-family:var(--font)">+ Ajouter un lien</button>
+      </div>
       <button class="btn-primary" onclick="addItem()">Ajouter</button>
     </div>
   </div>
@@ -455,7 +477,7 @@ const DOC_ID = 'main';
 let db = null;
 let data = { sections: [...DEFAULT_SECTIONS], items: {}, taskStatuses: {}, folders: {} };
 let activeSection = null;
-let currentFolder = null; // null = root of section
+let currentFolder = null;
 let unsubscribe = null;
 
 // ── Config ──
@@ -758,6 +780,8 @@ function renderContent() {
         '<div class="card-title">' + esc(item.title) + '</div>' +
         (item.description ? '<div class="card-desc">' + esc(item.description) + '</div>' : '') +
         (item.code ? '<div class="card-code">' + esc(item.code.substring(0,60)) + '…</div>' : '') +
+        (item.files && item.files.length > 0 ? '<div class="file-badge">📎 ' + item.files.length + ' fichier' + (item.files.length>1?'s':'') + '</div>' : '') +
+        (item.links && item.links.length > 0 ? '<div class="file-badge">🔗 ' + item.links.length + ' lien' + (item.links.length>1?'s':'') + '</div>' : '') +
         '<div class="card-date">' + fmtDate(item.createdAt) + '</div></div>'
       ).join('') + '</div>';
     } else if (query) {
@@ -798,21 +822,77 @@ function cycleTask(id) {
 }
 
 // ── Items ──
+let linkCount = 0;
+
 function openAddItem() {
   const section = data.sections.find(s => s.id === activeSection);
   document.getElementById('modal-add-title').textContent = 'Ajouter — ' + (section?.name || '');
   document.getElementById('item-title').value = '';
   document.getElementById('item-desc').value = '';
   document.getElementById('item-code').value = '';
+  linkCount = 0;
+  document.getElementById('link-inputs-list').innerHTML = '';
   const showCode = activeSection === 'vba' || !DEFAULT_IDS.includes(activeSection);
   document.getElementById('item-code').style.display = showCode ? 'block' : 'none';
+  document.getElementById('file-links-zone').style.display = activeSection === 'tasks' ? 'none' : 'block';
+  addLinkInput(); // start with one link field
   openModal('modal-add-item');
+}
+
+function addLinkInput() {
+  const id = 'link-' + linkCount++;
+  const container = document.getElementById('link-inputs-list');
+  const row = document.createElement('div');
+  row.id = id;
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:6px;align-items:center';
+  row.innerHTML = '<input class="input input-sm" placeholder="Nom du fichier" style="width:35%">' +
+    '<input class="input input-sm" placeholder="Coller le lien ici (https://...)" style="flex:1">' +
+    '<button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px">✕</button>';
+  container.appendChild(row);
+}
+
+function collectLinks() {
+  const rows = document.getElementById('link-inputs-list').children;
+  const links = [];
+  for (const row of rows) {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    const url = inputs[1].value.trim();
+    if (url) {
+      links.push({ name: name || getLinkLabel(url), url: url });
+    }
+  }
+  return links;
+}
+
+function getLinkLabel(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes('drive.google')) return 'Google Drive';
+    if (hostname.includes('onedrive') || hostname.includes('sharepoint')) return 'OneDrive';
+    if (hostname.includes('dropbox')) return 'Dropbox';
+    if (hostname.includes('github')) return 'GitHub';
+    return hostname;
+  } catch { return 'Lien'; }
+}
+
+function getLinkIcon(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    if (hostname.includes('drive.google')) return '📊';
+    if (hostname.includes('onedrive') || hostname.includes('sharepoint')) return '📁';
+    if (hostname.includes('dropbox')) return '📦';
+    if (hostname.includes('github')) return '💻';
+    return '🔗';
+  } catch { return '🔗'; }
 }
 
 function addItem() {
   const title = document.getElementById('item-title').value.trim();
   if (!title || !activeSection) return;
   const id = 'item_' + Date.now();
+  const links = collectLinks();
+
   data.items[id] = {
     id, title,
     description: document.getElementById('item-desc').value.trim(),
@@ -820,6 +900,7 @@ function addItem() {
     createdAt: new Date().toISOString(),
     sectionId: activeSection,
     folderId: currentFolder || null,
+    links: links,
   };
   if (activeSection === 'tasks') data.taskStatuses[id] = 'todo';
   saveToFirestore(); closeModal('modal-add-item');
@@ -835,7 +916,29 @@ function viewItem(id) {
     body += '<div class="code-block"><pre>' + esc(item.code) + '</pre>' +
       '<button class="btn-copy" onclick="copyCode(this,\'' + id + '\')">Copier</button></div>';
   }
-  // Show folder path
+  // Show links
+  if (item.links && item.links.length > 0) {
+    body += '<div style="margin-top:12px"><div style="color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Fichiers liés (' + item.links.length + ')</div>';
+    item.links.forEach(l => {
+      body += '<a href="' + esc(l.url) + '" target="_blank" rel="noopener" class="file-attachment" style="text-decoration:none;display:flex">' +
+        '<span>' + getLinkIcon(l.url) + '</span>' +
+        '<span style="color:var(--text)">' + esc(l.name) + '</span>' +
+        '<span style="color:var(--accent);font-size:11px">↗ Ouvrir</span>' +
+        '</a>';
+    });
+    body += '</div>';
+  }
+  // Legacy: show old file attachments if any
+  if (item.files && item.files.length > 0) {
+    body += '<div style="margin-top:12px"><div style="color:var(--text-muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Fichiers (' + item.files.length + ')</div>';
+    item.files.forEach(f => {
+      body += '<a href="' + f.url + '" target="_blank" class="file-attachment" style="text-decoration:none;display:flex">' +
+        '<span>📎</span><span style="color:var(--text)">' + esc(f.name) + '</span>' +
+        '<span style="color:var(--accent);font-size:11px">↗ Ouvrir</span></a>';
+    });
+    body += '</div>';
+  }
+  // Folder path
   let folderLabel = '';
   if (item.folderId && data.folders[item.folderId]) {
     const path = getFolderPath(item.folderId);
